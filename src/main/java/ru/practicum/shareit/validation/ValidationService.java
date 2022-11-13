@@ -16,24 +16,25 @@ import ru.practicum.shareit.user.repository.UserRepository;
 public class ValidationService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
-    
+
     @Autowired
     public ValidationService(ItemRepository itemRepository, UserRepository userRepository) {
         this.itemRepository = itemRepository;
         this.userRepository = userRepository;
     }
-    
+
     /**
      * Проверка пользователя на уникальность почты в БД при ОБНОВЛЕНИИ пользователя.
      * <p>Если почта принадлежит этому же пользователю, то всё хорошо.</p>
      * <p>Если почта принадлежит другому пользователю, то генерируется исключение.</p>
+     *
      * @param user пользователь.
      * @throws ValidateException генерируемое исключение.
      */
     public void checkUniqueEmailToUpdate(User user) {
         final Long inputId = user.getId();
         final String inputEmail = user.getEmail();
-        
+
         if (inputId == null) {
             //обновление не возможно, поскольку нет ID.
             String message = "1. Обновление пользователя невозможно, поскольку ID входящего пользователя " +
@@ -41,7 +42,7 @@ public class ValidationService {
             log.info(message + " Входящий пользователь: " + user);
             throw new NotFoundRecordInBD(message);
         }
-        
+
         final Long idFromDbByEmail = userRepository.getUserIdByEmail(inputEmail);
         if (idFromDbByEmail != null && !inputId.equals(idFromDbByEmail)) {
             String message = String.format("2. Обновление пользователя невозможно, поскольку email = %s " +
@@ -50,18 +51,19 @@ public class ValidationService {
             throw new ConflictException(message);
         } //else if ()
     }
-    
-    
+
+
     /**
      * Проверка пользователя на уникальность почты.
      * <p>Если почта принадлежит этому же пользователю, то всё хорошо.</p>
      * <p>Если почта принадлежит другому пользователю, то генерируется исключение.</p>
+     *
      * @param user пользователь.
      * @throws ConflictException генерируемое исключение.
      */
     public void checkUniqueEmailToCreate(User user) {
         final String inputEmail = user.getEmail();
-        
+
         Long idFromDbByEmail = userRepository.getUserIdByEmail(inputEmail);
         //Надо проверить уникальность почты.
         if (idFromDbByEmail != null) {
@@ -72,9 +74,10 @@ public class ValidationService {
             throw new ConflictException(message);
         }
     }
-    
+
     /**
      * Проверка всех полей пользователя.
+     *
      * @param user пользователь.
      * @throws ValidateException генерируемое исключение.
      */
@@ -85,7 +88,7 @@ public class ValidationService {
             log.info(error);
             throw new ValidateException(error);
         }
-        
+
         final String name = user.getName();
         if (name == null || name.isBlank()) {
             String error = "Имя пользователя не может быть пустым.";
@@ -93,10 +96,11 @@ public class ValidationService {
             throw new ValidateException(error);
         }
     }
-    
+
     /**
      * Проверка полей пользователя.
      * <p>Если оба поля 'name' и 'email' равны null, то генерируется исключение.</p>
+     *
      * @return массив boolean. Если поле null, то False.
      * <p>Первый элемент - имя, второй - email.</p>
      */
@@ -107,15 +111,16 @@ public class ValidationService {
         final String email = user.getEmail();
         result[0] = (name != null) && !name.isBlank();
         result[1] = (email != null) && !email.isBlank();
-        
+
         if (result[0] || result[1]) {
             return result;
         }
         throw new ValidateException("Все поля пользователя равны 'null'.");
     }
-    
+
     /**
      * Проверка наличия юзера в БД.
+     *
      * @param userId пользователя.
      * @throws NotFoundRecordInBD - пользователь не найден в БД.
      */
@@ -127,15 +132,16 @@ public class ValidationService {
             throw new NotFoundRecordInBD(error);
         }
         return result;
-        
+
     }
-    
+
     /////////////////////////////////////////////////////////////////////////////////
     //////////                  Проверки для вещей.                   ///////////////
     /////////////////////////////////////////////////////////////////////////////////
-    
+
     /**
      * Проверка наличия вещи в БД.
+     *
      * @param itemId ID вещи.
      * @return Null - вещь не найдена.
      * <p>Item -  вещь найдена.</p>
@@ -150,9 +156,10 @@ public class ValidationService {
         }
         return item;
     }
-    
+
     /**
      * Проверка отсутствия вещи в БД.
+     *
      * @param itemId ID вещи.
      * @throws ConflictException Если вещь есть в БД, то генерируется исключение.
      */
@@ -164,9 +171,10 @@ public class ValidationService {
             throw new ConflictException(message);
         }
     }
-    
+
     /**
      * Проверка всех полей вещей.
+     *
      * @param item вещь.
      * @throws ValidateException генерируемое исключение.
      */
@@ -177,7 +185,7 @@ public class ValidationService {
             log.info(error);
             throw new ValidateException(error);
         }
-        
+
         final String description = item.getDescription();
         if (description == null || description.isBlank()) {
             String error = "Описание вещи не может быть пустым.";
@@ -197,11 +205,12 @@ public class ValidationService {
             throw new ValidateException(error);
         }
     }
-    
-    
+
+
     /**
      * Проверка полей пользователя.
      * <p>Если оба поля 'name' и 'email' равны null, то генерируется исключение.</p>
+     *
      * @return массив boolean. Если поле null, то False.
      * <p>Первый элемент - name, второй - description, третий - ownerId, четвёртый - available,</p>
      * <p>пятый - isRequest, шестой - отзывы.</p>
@@ -212,16 +221,17 @@ public class ValidationService {
         result[0] = (item.getName() != null) && !item.getName().isBlank();
         result[1] = (item.getDescription() != null) && !item.getDescription().isBlank();
         result[2] = item.getAvailable() != null;
-        
+
         for (boolean b : result) {
             if (b) return result;
         }
         throw new ValidateException("Все поля: название, описание и статус доступа к аренде равны 'null'.");
     }
-    
-    
+
+
     /**
      * Проверка: принадлежит ли вещь её хозяину.
+     *
      * @return True - вещь принадлежит хозяину.
      * <p>False - вещь не принадлежит хозяину.</p>
      * @throws ValidateException Если вещь и (или) ID хозяина = null.

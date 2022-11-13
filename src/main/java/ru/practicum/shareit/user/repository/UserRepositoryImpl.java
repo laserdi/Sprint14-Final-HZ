@@ -13,13 +13,14 @@ import java.util.List;
 @Slf4j
 @Qualifier("InMemory")
 public class UserRepositoryImpl implements UserRepository {
-    
+
     private final HashMap<Long, User> userMap = new HashMap<>();
-    
+
     private Long counter = 0L;
-    
+
     /**
      * Добавить юзера в БД.
+     *
      * @param user пользователь.
      * @return добавляемый пользователь.
      */
@@ -29,21 +30,22 @@ public class UserRepositoryImpl implements UserRepository {
         userMap.put(user.getId(), user);
         return user;
     }
-    
+
     /**
      * Обновить юзера в БД.
+     *
      * @param user пользователь
      * @return обновлённый пользователь.
      */
     @Override
     public User updateInStorage(User user, boolean[] isUpdateField) {
-        
+
         final Long inputId = user.getId();
         final String inputName = user.getName();
         final String inputEmail = user.getEmail();
-        
+
         User recordFromDB = userMap.get(inputId);   //Пользователь из БД.
-        
+
         if (isUpdateField[0]) {
             recordFromDB.setName(inputName);
         }
@@ -53,27 +55,30 @@ public class UserRepositoryImpl implements UserRepository {
         userMap.put(inputId, recordFromDB);
         return recordFromDB;
     }
-    
+
     /**
      * Удалить пользователя из БД.
+     *
      * @param id ID удаляемого пользователя.
      */
     @Override
     public void removeFromStorage(Long id) {
         userMap.remove(id);
     }
-    
+
     /**
      * Получить список всех пользователей.
+     *
      * @return список пользователей.
      */
     @Override
     public List<User> getAllUsersFromStorage() {
         return new ArrayList<>(userMap.values());
     }
-    
+
     /**
      * Получить пользователя по ID.
+     *
      * @param id ID пользователя.
      * @return User - пользователь присутствует в библиотеке.
      * <p>null - пользователя нет в библиотеке.</p>
@@ -82,9 +87,10 @@ public class UserRepositoryImpl implements UserRepository {
     public User getUserById(Long id) {
         return userMap.get(id);
     }
-    
+
     /**
      * Проверка наличия юзера в БД.
+     *
      * @param id пользователя.
      * @return True - пользователь найден. False - пользователя нет в БД.
      */
@@ -92,9 +98,10 @@ public class UserRepositoryImpl implements UserRepository {
     public boolean isExistUserInDB(Long id) {
         return userMap.containsKey(id);
     }
-    
+
     /**
      * Проверка наличия пользователя по `Email`.
+     *
      * @param newEmail адрес эл. почты нового пользователя.
      * @return True - пользователь с Email есть в БД. False - нет.
      */
