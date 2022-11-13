@@ -12,4 +12,5 @@ import ru.practicum.shareit.user.model.User;
 public interface UserMapper {
     User mapToModel(UserDto itemDto);
     UserDto mapToDto(User user);
+
 }
